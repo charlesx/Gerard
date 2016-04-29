@@ -1,0 +1,23 @@
+16:29:30 **** Incremental Build of configuration Debug for project gerard ****
+make all 
+'Building file: ../Src/main.c'
+'Invoking: MCU GCC Compiler'
+C:\Users\Nicolas\Google Drive\FabAlpes_Shared\Software\code\WS_gerard\gerard\Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x6 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/main.d" -MT"Src/main.o" -o "Src/main.o" "../Src/main.c"
+'Finished building: ../Src/main.c'
+' '
+'Building target: gerard.elf'
+'Invoking: MCU GCC Linker'
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -specs=nosys.specs -specs=nano.specs -T"../STM32F030C6Tx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -lm -o "gerard.elf" @"objects.list"  
+'Finished building target: gerard.elf'
+' '
+make --no-print-directory post-build
+'Generating binary and Printing size information:'
+arm-none-eabi-objcopy -O binary "gerard.elf" "gerard.bin"
+arm-none-eabi-size "gerard.elf"
+   text	   data	    bss	    dec	    hex	filename
+   7604	     12	   1996	   9612	   258c	gerard.elf
+' '
+
+16:29:48 Build Finished (took 18s.101ms)
+
