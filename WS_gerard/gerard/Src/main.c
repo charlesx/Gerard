@@ -107,8 +107,8 @@ int main(void)
     HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);
 
-    motor_SetDuty(&htim3, 50);
-    motor_SetDuty(&htim1, 50);
+    motor_SetDuty(&htim3, 70);
+    motor_SetDuty(&htim1, 70);
 
   /* USER CODE END 2 */
 
@@ -255,7 +255,7 @@ void MX_TIM1_Init(void)
   TIM_OC_InitTypeDef sConfigOC;
 
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = FREQ_H;
+  htim1.Init.Prescaler = 48;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 100;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -305,7 +305,7 @@ void MX_TIM3_Init(void)
   TIM_OC_InitTypeDef sConfigOC;
 
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = FREQ_H;
+  htim3.Init.Prescaler = 48;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 100;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -389,16 +389,16 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(M0_A_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SW_LEARN_WIN_Pin SW_TACTIC_Pin M1_B_Pin */
-  GPIO_InitStruct.Pin = SW_LEARN_WIN_Pin|SW_TACTIC_Pin|M1_B_Pin;
+  /*Configure GPIO pins : SW_LEARN_WIN_Pin SW_TACTIC_Pin BT_START_Pin M1_B_Pin */
+  GPIO_InitStruct.Pin = SW_LEARN_WIN_Pin|SW_TACTIC_Pin|BT_START_Pin|M1_B_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB2 PB10 PB11 PB3 
-                           PB7 PB9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_3 
-                          |GPIO_PIN_7|GPIO_PIN_9;
+  /*Configure GPIO pins : PB10 PB11 PB3 PB7 
+                           PB9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_3|GPIO_PIN_7 
+                          |GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
