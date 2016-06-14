@@ -1,0 +1,83 @@
+Configuration	gerard
+STM32CubeMX 	4.14.0
+Date	05/03/2016
+MCU	STM32F030C6Tx
+
+
+
+PERIPHERALS	MODES	FUNCTIONS	PINS
+ADC	IN3	ADC_IN3	PA3
+ADC	IN4	ADC_IN4	PA4
+ADC	IN5	ADC_IN5	PA5
+ADC	IN6	ADC_IN6	PA6
+I2C1	I2C	I2C1_SCL	PF6
+I2C1	I2C	I2C1_SDA	PF7
+RCC	Crystal/Ceramic Resonator	RCC_OSC_IN	PF0-OSC_IN
+RCC	Crystal/Ceramic Resonator	RCC_OSC_OUT	PF1-OSC_OUT
+SYS	Serial-WireDebug	SYS_SWCLK	PA14
+SYS	Serial-WireDebug	SYS_SWDIO	PA13
+SYS	SysTick	SYS_VS_Systick	VP_SYS_VS_Systick
+TIM1	Internal Clock	TIM1_VS_ClockSourceINT	VP_TIM1_VS_ClockSourceINT
+TIM1	PWM Generation CH1	TIM1_CH1	PA8
+TIM1	PWM Generation CH2	TIM1_CH2	PA9
+TIM3	Internal Clock	TIM3_VS_ClockSourceINT	VP_TIM3_VS_ClockSourceINT
+TIM3	PWM Generation CH1	TIM3_CH1	PB4
+TIM3	PWM Generation CH2	TIM3_CH2	PB5
+
+
+
+Pin Nb	PINs	FUNCTIONs	LABELs
+5	PF0-OSC_IN	RCC_OSC_IN	
+6	PF1-OSC_OUT	RCC_OSC_OUT	
+10	PA0	GPIO_Input	IR_GPIO1
+11	PA1	GPIO_Input	M0_B
+12	PA2	GPIO_EXTI2	M0_A
+13	PA3	ADC_IN3	V_BAT
+14	PA4	ADC_IN4	IR_GAUCHE_AN
+15	PA5	ADC_IN5	IR_CENTRE_AN
+16	PA6	ADC_IN6	IR_DROITE_AN
+17	PA7	GPIO_Input	TP32
+18	PB0	GPIO_Input	SW_LEARN_WIN
+19	PB1	GPIO_Input	SW_TACTIC
+25	PB12	GPIO_Output	LED3_AR_GAUCHE
+26	PB13	GPIO_Output	LED1_AR_DROITE
+27	PB14	GPIO_Output	LED2_AV_GAUCHE
+28	PB15	GPIO_Output	LED4_AV_DROITE
+29	PA8	TIM1_CH1	M0_INA
+30	PA9	TIM1_CH2	M0_INB
+34	PA13	SYS_SWDIO	
+35	PF6	I2C1_SCL	
+36	PF7	I2C1_SDA	
+37	PA14	SYS_SWCLK	
+40	PB4	TIM3_CH1	M1_INA
+41	PB5	TIM3_CH2	M1_INB
+42	PB6	GPIO_Input	M1_B
+45	PB8	GPIO_EXTI8	M1_A
+
+
+
+SOFTWARE PROJECT
+
+Project Settings : 
+Project Name : gerard
+Project Folder : C:\Users\Nicolas\Google Drive\FabAlpes_Shared\Software\code\Gerard\WS_gerard\gerard
+Toolchain / IDE : SW4STM32
+Firmware Package Name and Version : STM32Cube FW_F0 V1.5.0
+
+
+Code Generation Settings : 
+STM32Cube Firmware Library Package : Copy only the necessary library files
+Generate peripheral initialization as a pair of '.c/.h' files per IP : No
+Backup previously generated files when re-generating : No
+Delete previously generated files when not re-generated : Yes
+Set all free pins as analog (to optimize the power consumption) : Yes
+
+
+Toolchains Settings : 
+Compiler Optimizations : Balanced Size/Speed
+
+
+
+
+
+
