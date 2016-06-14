@@ -37,7 +37,8 @@
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
-
+#define START_PIN GPIO_PIN_2
+#define START_PORT GPIOB
 #define IR_GPIO1_Pin GPIO_PIN_0
 #define IR_GPIO1_GPIO_Port GPIOA
 #define M0_B_Pin GPIO_PIN_1

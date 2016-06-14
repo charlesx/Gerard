@@ -131,5 +131,10 @@ void DMA1_Channel2_3_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	//HAL_GPIO_WritePin(LED3_AR_GAUCHE_GPIO_Port, LED3_AR_GAUCHE_Pin, 0);
+}
+
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

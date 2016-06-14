@@ -40,6 +40,13 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc;
 DMA_HandleTypeDef hdma_adc;
+__IO uint16_t ADCValueRight=0;
+__IO uint16_t ADCValueCenter=0;
+#define SENSOR_MIN 2300
+#define SENSOR_MAX 2800
+// 2200, 2700
+#define COMMAND_MIN 45
+#define COMMAND_MAX 55
 
 I2C_HandleTypeDef hi2c1;
 DMA_HandleTypeDef hdma_i2c1_rx;
@@ -71,7 +78,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-#define FREQ_H 24  //24 is good
+#define FREQ_H 24  //24 is good // 48 is bad
 /* USER CODE END 0 */
 
 int main(void)
@@ -91,13 +98,25 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
+ // MX_DMA_Init();
   MX_ADC_Init();
-  MX_I2C1_Init();
+ // MX_I2C1_Init();
   MX_TIM1_Init();
   MX_TIM3_Init();
 
   /* USER CODE BEGIN 2 */
+  //exti enable for GPIO coder pins:
+  /*HAL_NVIC_SetPriority(6, 1, 0); //M0_A
+  HAL_NVIC_EnableIRQ(6);
+  HAL_NVIC_SetPriority(11, 1, 0); //M1_A
+  HAL_NVIC_EnableIRQ(11);
+*/
+  //PA5  ADC J10 (capteur IR droit)
+//  HAL_ADC_Start(&hadc1);
+    //ConfigureADC();
+     // HAL_ADC_Enable(&hadc);
+      HAL_ADC_Start(&hadc);
+
   //PWM moteur gauche
     HAL_TIM_Base_Start(&htim1);
     HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
@@ -110,27 +129,103 @@ int main(void)
     motor_SetDuty(&htim3, 50);
     motor_SetDuty(&htim1, 50);
 
+    //HAL_GPIO_WritePin(LED3_AR_GAUCHE_GPIO_Port, LED3_AR_GAUCHE_Pin, 1);
+
+  volatile int MagicVal;
+  volatile int attend = 0;
+  //volatile int compensation_fin_mur =0;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HAL_GPIO_WritePin(LED2_AV_GAUCHE_GPIO_Port, LED2_AV_GAUCHE_Pin, 0);
+  //wait start button
+  while(HAL_GPIO_ReadPin(START_PORT, START_PIN)==1){
+	  HAL_GPIO_TogglePin(LED2_AV_GAUCHE_GPIO_Port, LED2_AV_GAUCHE_Pin);
+	  HAL_Delay(100);
+  }
+  HAL_GPIO_WritePin(LED2_AV_GAUCHE_GPIO_Port, LED2_AV_GAUCHE_Pin, 1);
+  //wait 1 seconde
+  HAL_Delay(1000);
+  HAL_GPIO_WritePin(LED2_AV_GAUCHE_GPIO_Port, LED2_AV_GAUCHE_Pin, 0);
+
+  HAL_ADC_Start(&hadc);
   while (1)
   {
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+	  hadc.Instance->CHSELR = ADC_CHSELR_CHANNEL(ADC_CHANNEL_5);
+	  HAL_ADC_Start(&hadc);
+	  if (HAL_ADC_PollForConversion(&hadc, 1000) == HAL_OK)
+	  {
+	     ADCValueCenter = HAL_ADC_GetValue(&hadc);
+	  }
+	  hadc.Instance->CHSELR = ADC_CHSELR_CHANNEL(ADC_CHANNEL_6);
+	  HAL_ADC_Start(&hadc);
+	  if (HAL_ADC_PollForConversion(&hadc, 1000) == HAL_OK)
+	  {
+	     ADCValueRight = HAL_ADC_GetValue(&hadc);
+	  }
+	 // ADCValue = 1500;
+	  //ADC_CHSELR_CHANNEL(ADC_CHANNEL_5);
+	 // *(0x40012428) = 0;//ADC_CHANNEL_5;
+
+	  //50 = 0x0000 20000     0
+	  //70 = 0xFFFF 65500 20 x
+
+	  // proche mur = 2800
+	  // loin mur = 2300
+	  int save_min_right = ADCValueRight;
+	  int save_min_left = ADCValueCenter;
+	  if(ADCValueRight < SENSOR_MIN) ADCValueRight = SENSOR_MIN;
+	  if(ADCValueRight > SENSOR_MAX) ADCValueRight = SENSOR_MAX;
+	  if(ADCValueCenter < SENSOR_MIN) ADCValueCenter = SENSOR_MIN;
+	  if(ADCValueCenter > SENSOR_MAX) ADCValueCenter = SENSOR_MAX;
+
+	  //ADCValue -= 1000; //1457
+	  //COMMAND_MIN SENSOR_MIN
+	  MagicVal = COMMAND_MIN + ((COMMAND_MAX-COMMAND_MIN) - ( ((ADCValueRight-SENSOR_MIN) * (COMMAND_MAX-COMMAND_MIN)) / (SENSOR_MAX-SENSOR_MIN)));
+
+	  /*motor_SetDuty(&htim1, MagicVal);
+
+	  if(MagicVal > 57) motor_SetDuty(&htim3, 50);
+	  else motor_SetDuty(&htim3, 45);*/
+
+	  //detection de l'infini et de l'audela -> virage programé vers la droite
+	  if(save_min_right < 1900 && attend > 0) {
+		  motor_SetDuty(&htim1, 57);
+		  motor_SetDuty(&htim3, 45);
+		  HAL_Delay(900);
+		//  motor_SetDuty(&htim1, COMMAND_MAX);
+		//  motor_SetDuty(&htim3, 52 - ((COMMAND_MAX-50)/2));
+		//  HAL_Delay(600);
+		  attend = -12;
+	  } else if(save_min_left > 2680 && attend > 0) {
+		  motor_SetDuty(&htim1, 43);
+		  motor_SetDuty(&htim3, 47);
+		  HAL_Delay(400);
+		  attend = -2;
+	  } else {
+      attend++;
+	  motor_SetDuty(&htim1, MagicVal+3);
+	  motor_SetDuty(&htim3, MagicVal-3);
+	  }
+
 	  HAL_GPIO_WritePin(LED3_AR_GAUCHE_GPIO_Port, LED3_AR_GAUCHE_Pin, 1);
 	  HAL_GPIO_WritePin(LED3_AR_GAUCHE_GPIO_Port, LED1_AR_DROITE_Pin, 1);
 
 	  //__HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_1, pwm); //update // http://letanphuc.net/2015/06/stm32f0-timer-tutorial-and-counter-tutorial/
 	  //http://www.enib.fr/~kerhoas/motorCommand.html
-	  HAL_Delay(500);  //hold for 500ms
+	  HAL_Delay(30);  //hold for 500ms
 
 	  HAL_GPIO_WritePin(LED3_AR_GAUCHE_GPIO_Port, LED3_AR_GAUCHE_Pin, 0);
 	  HAL_GPIO_WritePin(LED3_AR_GAUCHE_GPIO_Port, LED1_AR_DROITE_Pin, 0);
 
 	  //__HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_1, pwm); //update
-	  HAL_Delay(500);  //hold for 500ms
+	  HAL_Delay(10);  //hold for 500ms
+
   }
   /* USER CODE END 3 */
 
@@ -174,7 +269,7 @@ void SystemClock_Config(void)
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
   /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(-1, 0, 0);
 }
 
 /* ADC init function */
@@ -202,10 +297,10 @@ void MX_ADC_Init(void)
 
     /**Configure for the selected ADC regular channel to be converted. 
     */
-  sConfig.Channel = ADC_CHANNEL_3;
+  //sConfig.Channel = ADC_CHANNEL_3;
   sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
   sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+  //HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
     /**Configure for the selected ADC regular channel to be converted. 
     */
@@ -343,11 +438,11 @@ void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA1_Channel1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+  HAL_NVIC_SetPriority(9, 0, 0);
+  HAL_NVIC_EnableIRQ(9);
   /* DMA1_Channel2_3_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
+  HAL_NVIC_SetPriority(10, 0, 0);
+  HAL_NVIC_EnableIRQ(10);
 
 }
 
@@ -395,9 +490,14 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB2 PB10 PB11 PB3 
+  GPIO_InitStruct.Pin = GPIO_PIN_2;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PB10 PB11 PB3
                            PB7 PB9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_3 
+  GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_3
                           |GPIO_PIN_7|GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
